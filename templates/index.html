@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Trading Dashboard</title>
+    <style>
+        body {
+            background-image: url('https://images.unsplash.com/photo-1559526324-593bc073d938?fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* min-height: 100vh; */
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f6fa;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+        }
+
+        .sidebar h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 20px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 10px;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .sidebar button:hover {
+            background-color: #1abc9c;
+        }
+
+        .sidebar .submenu {
+            list-style-type: none;
+            padding-left: 10px;
+            display: none;
+        }
+
+        .sidebar .submenu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar .submenu button {
+            background-color: #16a085;
+            font-size: 14px;
+        }
+
+        .sidebar .submenu button:hover {
+            background-color: #1abc9c;
+        }
+
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            flex: 1 1 calc(33.333% - 20px);
+            box-sizing: border-box;
+            text-align: center;
+            height: 180px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .card p {
+            font-size: 16px;
+        }
+
+        .form-container {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+        }
+
+        .submit-button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .submit-button:hover {
+            background-color: #2980b9;
+        }
+
+        .submenu {
+            display: none;
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        .submenu li {
+            margin-bottom: 10px;
+        }
+
+        .submenu button {
+            width: 100%;
+            padding: 10px;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .submenu button:hover {
+            background-color: #1abc9c;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 10px;
+            }
+
+            .form-container {
+                width: 100%;
+            }
+
+            .card {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+        <button style="width: 35%; padding: 6px 8px; background-color: #e74c3c; color: white; border: none; cursor: pointer; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
+        onclick="logout()">
+             🔒Logout
+        </button>
+
+        <h1>STOCK TRADING</h1>
+        <ul>
+            <li>
+                <button onclick="showForm('uploadData')">Upload Data</button>
+            </li>
+            <li>
+                <button onclick="toggleMenu('reportsMenu')">Reports</button>
+                <ul id="reportsMenu" class="submenu">
+                    <li><button onclick="showForm('report2')">Report Generator</button></li>
+                    <li><button onclick="showForm('report3')">Report3</button></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+        <!-- Dashboard -->
+        <!-- <div id="dashboard" class="dashboard">
+            <div class="card">
+                <h3>Stock Prices</h3>
+                <p>Placeholder for stock prices</p>
+            </div>
+            <div class="card">
+                <h3>Market Trends</h3>
+                <p>Placeholder for market trends</p>
+            </div>
+            <div class="card">
+                <h3>Portfolio Performance</h3>
+                <p>Placeholder for portfolio performance</p>
+            </div>
+        </div> -->
+
+        <!-- Upload Data Form -->
+        <div id="uploadData" class="form-container" style="display: none;">
+            <h2 class="form-title">Upload Data</h2>
+            <form action="/upload-data" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Choose File:</label>
+                    <input type="file" id="file" name="file" required>
+                </div>
+                <button type="submit" class="submit-button">Upload</button>
+            </form>
+        </div>
+
+        <!-- Report Generator Form -->
+        <div id="report2" class="form-container hidden">
+            <h2 class="form-title">Report Generator</h2>
+            <form action="/get-report" method="POST">
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" required>
+                </div>
+                <button type="submit" class="submit-button">Get Report</button>
+            </form>
+        </div>
+
+        <!-- Placeholder for future forms -->
+        <div id="report3" class="form-container" style="display: none;">
+            <h2 class="form-title">Report 3 (Coming Soon)</h2>
+        </div>
+    </div>
+
+    <script>
+        function showForm(formId) {
+            const forms = document.querySelectorAll('.form-container');
+            const dashboard = document.getElementById('dashboard');
+            forms.forEach(form => form.style.display = 'none');
+            document.getElementById(formId).style.display = 'block';
+            dashboard.style.display = 'none';
+        }
+        function logout() {
+    // Example logic for logout
+    // You can replace this with actual logout handling like redirecting or clearing session
+        alert("Logged out!");
+        window.location.href = "/logout"; // or your actual logout route
+        }
+
+
+        function toggleMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function showDashboard() {
+            const forms = document.querySelectorAll('.form-container');
+            const dashboard = document.getElementById('dashboard');
+            forms.forEach(form => form.style.display = 'none');
+            dashboard.style.display = 'flex';
+        }
+
+        // Show dashboard on page load
+        document.addEventListener('DOMContentLoaded', showDashboard);
+    </script>
+</body>
+
+</html>
