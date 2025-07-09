@@ -177,33 +177,46 @@ def upload_data():
 
     return render_template("upload_data.html")
 
-# Route for handling report functionality (after login)
 @app.route("/get-report", methods=["POST", "GET"])
 def get_stock_report():
     if 'username' not in session:
-        return redirect(url_for('index'))  # Redirect to login page if not logged in
+        return redirect(url_for('index'))
 
     try:
         if request.method == 'POST':
-            start_date = request.form.get("start_date")
-            end_date = request.form.get("end_date")
+            start_date_str = request.form.get("start_date")
+            end_date_str = request.form.get("end_date")
 
-            start_date = pd.to_datetime(start_date)
-            end_date = pd.to_datetime(end_date) + timedelta(days=1)
+            start_date = pd.to_datetime(start_date_str)
+            end_date = pd.to_datetime(end_date_str) + timedelta(days=1)
 
+            # Load data
+            all_data_df = lst_yrd_10_df(stock_collection)
             stock_df = stock_data_calculation(stock_collection, start_date, end_date)
-            report_data = report_calculation(stock_df, start_date, end_date)
 
-            # Ensure dates are formatted correctly
-            for key in ["start_price", "max_price"]:
-                for entry in report_data[key]:
-                    entry["Date"] = pd.to_datetime(entry["Date"]).strftime('%Y-%m-%d')
+            # Get both views data
+            report_data, yearwise_report = report_calculation(all_data_df, stock_df, start_date, end_date)
 
-            return render_template("stock_report.html", report_data=report_data)
+            # Get last 10 years list
+            years_list = sorted([start_date.year - i for i in range(1, 11)], reverse=True)
+
+            return render_template(
+                "test.html",
+                report_data=report_data,
+                yearwise_report=yearwise_report,
+                years_list=years_list
+            )
 
     except Exception as e:
         print("Error:", str(e))
-        return render_template("stock_report.html", report_data={})
+        return render_template(
+            "test.html",
+            report_data=[],
+            yearwise_report={},
+            years_list=[]
+        )
+
+
 
 # Route for logging out
 @app.route('/logout')
