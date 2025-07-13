@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, session,flash, redirect, url_for
 from datetime import datetime, timedelta
+import os
+from dotenv import load_dotenv
 import pymongo
 import pandas as pd
 from json_response import JSONResponse
@@ -10,8 +12,18 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # For session management
 
+# Load variables from .env file
+load_dotenv()
+
+# Get the URI from environment
+mongodb_uri = os.getenv("MONGODB_URI")
+
+# Connect
+client = pymongo.MongoClient(mongodb_uri)
+
 # MongoDB setup
-client = pymongo.MongoClient("mongodb://localhost:27017/")  # Connect to MongoDB
+# client = pymongo.MongoClient("mongodb://localhost:27017/")  # Connect to MongoDB
+
 db = client["MyStock"]  # Database name
 collection = db["custom_symbol"]  # Collection name
 stock_collection = db["stock_collection"]
