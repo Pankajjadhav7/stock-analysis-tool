@@ -105,45 +105,49 @@ def signup():
 def upload_data():
     if 'username' not in session:
         return redirect(url_for('index'))  # Redirect to login page if not logged in
-    
+
     if request.method == 'POST':
         try:
             # Check if a file is uploaded
             if 'file' not in request.files:
                 message = "No file part"
-                response = jsonify(error=message), 400
-                return response
+                return jsonify(error=message), 400
 
             file = request.files['file']
 
             # If no file is selected
             if file.filename == '':
                 message = "No selected file"
-                response = jsonify(error=message), 400
-                return response
+                return jsonify(error=message), 400
 
-            # Save the file temporarily
-            file.save("files/output/temp.csv")
+            # Make sure the output directory exists
+            output_dir = os.path.join(os.getcwd(), "files", "output")
+            os.makedirs(output_dir, exist_ok=True)
+
+            # Define the full path for saving
+            temp_file_path = os.path.join(output_dir, "temp.csv")
+            file.save(temp_file_path)
 
             # Try reading the file with different encodings
             encodings = ["utf-8", "latin-1"]
             for encoding in encodings:
                 try:
-                    df = pd.read_csv("files/output/temp.csv", encoding=encoding)
-                    df.columns = df.columns.str.strip()  # Strip any extra spaces from column names
+                    df = pd.read_csv(temp_file_path, encoding=encoding)
+                    df.columns = df.columns.str.strip()  # Strip spaces from headers
                     break
                 except UnicodeDecodeError:
                     continue
+            else:
+                return jsonify(error="Unable to read file with supported encodings."), 400
 
             # Check if all expected columns are present
             expected_header = ['Symbol', 'Date', 'Price', 'Open', 'High', 'Low', 'Vol.']
             missing_headers = [header for header in expected_header if header not in df.columns]
             if missing_headers:
                 message = f"Headers missing in the file: {', '.join(missing_headers)}"
-                response = jsonify(error=message), 400
-                return response
+                return jsonify(error=message), 400
 
-            # Rename columns to standardized names
+            # Standardize header names
             df.rename(columns={
                 'Symbol': 'Symbol',
                 'Date': 'Date',
@@ -154,23 +158,21 @@ def upload_data():
                 'Vol.': 'Vol',
             }, inplace=True)
 
-            # Add 'CreatedOn' column with current date
-            created_on = get_utc_date()
-            df["CreatedOn"] = created_on
+            # Add CreatedOn column
+            df["CreatedOn"] = get_utc_date()
 
-            # Try to convert date column to standard format
+            # Convert Date column to standard format
             try:
                 convert_date_column(df, "Date", ["%Y-%m-%d", "%d-%m-%Y", "%m/%d/%Y"], "%d-%m-%Y")
             except Exception as e:
-                message = "Date format doesn't match yyyy-mm-dd."
-                response = jsonify(error=message), 400
-                return response
+                message = "Date format doesn't match expected patterns."
+                return jsonify(error=message), 400
 
-            # Prepare data for insertion
+            # Prepare data for DB insertion
             data = df.to_dict(orient="records")
             header = ['Symbol', 'Date', 'Price', 'Open', 'High', 'Low', 'Vol', "CreatedOn"]
 
-            # Insert each row into the database
+            # Insert into MongoDB
             stock_collection.drop()
             inserted_count = 0
             for each in data:
@@ -179,15 +181,14 @@ def upload_data():
                 inserted_count += 1
 
             message = f"Inserted {inserted_count} rows into Stock Data."
-            response = jsonify(message=message), 200
-            return response
+            return jsonify(message=message), 200
 
         except Exception as e:
             message = str(e)
-            response = jsonify(error=message), 500
-            return response
+            return jsonify(error=message), 500
 
     return render_template("upload_data.html")
+
 
 @app.route("/get-report", methods=["POST", "GET"])
 def get_stock_report():
